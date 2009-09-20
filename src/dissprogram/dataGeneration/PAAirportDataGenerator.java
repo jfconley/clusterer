@@ -1,14 +1,9 @@
 /*
- * PAInfectTest.java
- *
- * Created on February 16, 2008, 4:27 PM
- *
- * To change this template, choose Tools | Template Manager
+ * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 
 package dissprogram.dataGeneration;
-
 import edu.psu.geovista.io.csv.CSVParser;
 import java.io.File;
 import java.io.FileReader;
@@ -20,10 +15,10 @@ import java.util.Arrays;
  *
  * @author jfc173
  */
-public class PARoadDataGenerator {
+public class PAAirportDataGenerator {
     
     /** Creates a new instance of PARoadDataGenerator */
-    public PARoadDataGenerator() {
+    public PAAirportDataGenerator() {
     }
 
     static int[][] susceptible;
@@ -35,11 +30,17 @@ public class PARoadDataGenerator {
     static int[] recoveredSummary;
     static int[] deadSummary; 
     static int[][] roadHere;
+    static int[][] airportHere;
+    static int[][] airConnections;
+    static int[][] airportList;
     
     public static void main (String[] args){
         String[][] values = new String[84][84];
         String[][] roadValues = new String[84][84];
+        String[][] airValues = new String[84][84];
         roadHere = new int[84][84];
+        airportHere = new int[84][84];
+        airportList = new int[30][3];
         
         try{
             File f = new File("D:/landscan/namerica06/export/highwaygrid.csv");        
@@ -59,8 +60,46 @@ public class PARoadDataGenerator {
             }
         }
         
-        for (int run = 1; run < 50; run++){
-            File folder = new File("D:/synthLandscan/road/run" + run);
+        try{
+            File f = new File("D:/landscan/namerica06/export/airportgrid.csv");        
+            FileReader in = new FileReader(f);
+            CSVParser csvp = new CSVParser(in);
+            airValues = csvp.getAllValues();                       
+        } catch (IOException ioe){
+            System.out.println("IOException: " + ioe.getMessage());
+        }        
+        int q = 0;
+        for (int i = 0; i < airValues.length; i++){
+            for (int j = 0; j < airValues[i].length; j++){
+                //in the susceptible double[][] creation, i and j get flipped so north remains at the top.  Make sure the airports do the same!
+                if (Integer.parseInt(airValues[i][j]) > 0){
+                    airportHere[j][i] = Integer.parseInt(airValues[i][j]);
+                    airportList[q] = new int[]{airportHere[j][i], j, i};
+                    q++;
+                } else {
+                    airportHere[j][i] = 0;
+                }
+            }
+        }        
+        
+        String[][] connectionValues = null;
+        try{
+            File f = new File("D:/landscan/namerica06/export/airportConnections.csv");        
+            FileReader in = new FileReader(f);
+            CSVParser csvp = new CSVParser(in);
+            connectionValues = csvp.getAllValues();                       
+        } catch (IOException ioe){
+            System.out.println("IOException: " + ioe.getMessage());
+        }    
+        airConnections = new int[connectionValues.length][connectionValues[0].length];
+        for (int i = 0; i < connectionValues.length; i++){
+            for (int j = 0; j < connectionValues[i].length; j++){
+                airConnections[i][j] = Integer.parseInt(connectionValues[i][j]);
+            }
+        }          
+        
+        for (int run = 0; run < 50; run++){
+            File folder = new File("D:/synthLandscan/airport/run" + run);
             folder.mkdir();        
             
             boolean done = false;
@@ -150,6 +189,7 @@ public class PARoadDataGenerator {
                                     //on the highways, these are preferentially located along the transport routes.
                                     double incXProb, decXProb, incYProb, decYProb;
                                     double hereProb = 0.3;
+                                    double airProb = 0.1;
                                     
                                     if (i+1 < roadHere.length){
                                         if ((roadHere[i][j] == 1) && (roadHere[i+1][j] == 1)){
@@ -246,7 +286,37 @@ public class PARoadDataGenerator {
                                             totalInfected++;
                                             recoverNow[time % 10][i][j]++;
                                         }                                    
-                                    } else {
+                                    } else if (r < incXProb + decXProb + incYProb + decYProb + hereProb + airProb){
+                                        //new case is via an air connection.
+                                        //find a connected airport.
+                                        if (airportHere[i][j] > 0){
+                                            int[] connectedAirports = new int[30];
+                                            int v = 0;
+                                            for (int w = 0; w < airConnections.length; w++){
+                                                if (airConnections[w][0] == airportHere[i][j]){
+                                                    connectedAirports[v] = airConnections[w][1];
+                                                    v++;
+                                                }
+                                            }
+                                            int r2 = (int) Math.floor(Math.random() * v);
+                                            int recipientAirport = connectedAirports[r2];
+                                            int recipientX = 0;
+                                            int recipientY = 0;
+                                            for (int f = 0; f < airportList.length; f++){
+                                                if (airportList[f][0] == recipientAirport){
+                                                    recipientX = airportList[f][1];
+                                                    recipientY = airportList[f][2];
+                                                }
+                                            }
+                                            if (susceptible[recipientX][recipientY] > 0){
+                                                //can only start a new case here if someone's susceptible
+                                                susceptible[recipientX][recipientY]--;
+                                                infectious[recipientX][recipientY]++;
+                                                totalInfected++;
+                                                recoverNow[time % 10][recipientX][recipientY]++;
+                                            }                                                                                         
+                                        }
+                                    }else {
                                         //no new case after all.  This is done so that the reproductive rate
                                         //is higher along the transportation routes.  Without a higher RR there,
                                         //the shape doesn't change much.  (Cases build up in isolated areas, and 
@@ -287,8 +357,8 @@ public class PARoadDataGenerator {
     
     private static void writeData(int time, int run){
         try{
-            String outFileName = "roadPAtime" + time + ".csv";
-            FileWriter outFile = new FileWriter("D:/synthLandscan/road/run" + run + "/" + outFileName);
+            String outFileName = "airportPAtime" + time + ".csv";
+            FileWriter outFile = new FileWriter("D:/synthLandscan/airport/run" + run + "/" + outFileName);
             
             outFile.write("x, y, pop, cases" + '\n');
             for (int i = 0; i < susceptible.length; i++){
@@ -307,7 +377,7 @@ public class PARoadDataGenerator {
     
     private static void writeSummaries(int run){ 
         try{
-            FileWriter outFile = new FileWriter("D:/synthLandscan/road/run" + run + "/summary.csv");
+            FileWriter outFile = new FileWriter("D:/synthLandscan/airport/run" + run + "/summary.csv");
             
             outFile.write("time, infected, recovered, dead" + '\n');
             for (int i = 0; i < infectedSummary.length; i++){
@@ -339,6 +409,5 @@ public class PARoadDataGenerator {
         recoveredSummary = newRecArray;
         deadSummary = newDeadArray;
     }        
-    
-    
+
 }

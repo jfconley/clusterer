@@ -42,14 +42,14 @@ public class PAWindDataGenerator {
     public static void main (String[] args){
         String[][] values = new String[84][84];
         
-        for (int run = 1; run < 50; run++){
-            File folder = new File("E:/synthLandscan/wind/run" + run);
+        for (int run = 50; run < 51; run++){
+            File folder = new File("D:/synthLandscan/wind/run" + run);
             folder.mkdir();        
             
             boolean done = false;
             while (!(done)){
                 try{
-                    File f = new File("E:/landscan/namerica06/export/nameraggcsv.csv");        
+                    File f = new File("D:/landscan/namerica06/export/nameraggcsv.csv");        
                     FileReader in = new FileReader(f);
                     CSVParser csvp = new CSVParser(in);
                     values = csvp.getAllValues();                       
@@ -128,7 +128,7 @@ public class PAWindDataGenerator {
                                         } else {
                                             airbornePollution--;
                                         } 
-                                    } else if (s < 0.55){
+                                    } else if (s < 0.95){
                                         if (i < concentration.length-1){
                                             nextStepConcentration[i+1][j]++;
                                         } else {
@@ -228,7 +228,7 @@ public class PAWindDataGenerator {
     private static void writeData(int time, int run){
         try{
             String outFileName = "windPAtime" + time + ".csv";
-            FileWriter outFile = new FileWriter("E:/synthLandscan/wind/run" + run + "/" + outFileName);
+            FileWriter outFile = new FileWriter("D:/synthLandscan/wind/run" + run + "/" + outFileName);
             
             outFile.write("x, y, pop, cases" + '\n');
             for (int i = 0; i < susceptible.length; i++){
@@ -247,7 +247,7 @@ public class PAWindDataGenerator {
     
     private static void writeSummaries(int run){ 
         try{
-            FileWriter outFile = new FileWriter("E:/synthLandscan/wind/run" + run + "/summary.csv");
+            FileWriter outFile = new FileWriter("D:/synthLandscan/wind/run" + run + "/summary.csv");
             
             outFile.write("time, infected, recovered, pollution" + '\n');
             for (int i = 0; i < infectedSummary.length; i++){
