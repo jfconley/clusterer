@@ -16,7 +16,7 @@ import java.util.Arrays;
  *
  * @author z4x
  */
-public class DistanceWeightedKNN implements AbstractSupervisedClassifier{
+public class DistanceWeightedKNN implements KNN{
     
     private String[] classes;
     private ClassedArray[] input;    

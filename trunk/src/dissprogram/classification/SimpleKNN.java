@@ -17,7 +17,7 @@ import java.util.Arrays;
  *
  * @author jfc173
  */
-public class SimpleKNN implements AbstractSupervisedClassifier{
+public class SimpleKNN implements KNN{
    
     private String[] classes;
     private ClassedArray[] input;    
