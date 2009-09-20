@@ -34,7 +34,7 @@ public class InfectionDataViewer {
     public static void main(String[] args){
         JFrame frame = new JFrame();
         frame.setVisible(true);
-        frame.setMinimumSize(new Dimension(1000, 1000));
+        frame.setPreferredSize(new Dimension(400, 425));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         int time = 0;
@@ -43,8 +43,7 @@ public class InfectionDataViewer {
         boolean scaleSize = true;
         while (notDone){
             try{
-//                File f = new File("E:/synthLandscan/road/run0/roadPAtime" + time + ".csv");
-                File f = new File("C:/jconley/rawork/IndianaDays/day" + time + ".csv");
+                File f = new File("D:/synthLandscan/road/run1/roadPAtime" + time + ".csv");
                 FileReader in = new FileReader(f);
                 CSVParser csvp = new CSVParser(in);
                 values = csvp.getAllValues();
@@ -55,28 +54,26 @@ public class InfectionDataViewer {
                 if (scaleSize){
                     g.clearRect(0, 0, 1000, 1000);
                     for (int i = 1; i < values.length; i++){
-//                        int x = 10 + 5*Integer.parseInt(values[i][0]);
-//                        int y = 10 + 5*Integer.parseInt(values[i][1]);
-                        int x = (int) Math.round(10 - 10 * Double.parseDouble(values[i][0]));
-                        int y = (int) Math.round(10 - 10 * Double.parseDouble(values[i][1]));
-                        int cases = Integer.parseInt(values[i][3]);
-                        if (cases != 0){
-                            g.setColor(Color.MAGENTA.darker());
-                            int size = 4 + (int) Math.floor(cases / 100);
-                            g.fillOval((int) Math.floor(x-(size/2)), (int) Math.floor(y-(size/2)), size, size);
-                        }
-                    }
-                    for (int i = 1; i < values.length; i++){
-//                        int x = 10 + 5*Integer.parseInt(values[i][0]);
-//                        int y = 10 + 5*Integer.parseInt(values[i][1]);
-                        int x = (int) Math.round(10 - 10 * Double.parseDouble(values[i][0]));
-                        int y = (int) Math.round(10 - 10 * Double.parseDouble(values[i][1]));                        
+                        int x = 10 + 5*Integer.parseInt(values[i][0]);
+                        int y = 10 + 5*Integer.parseInt(values[i][1]);
                         int cases = Integer.parseInt(values[i][3]);
                         if (cases == 0){
                             g.setColor(Color.LIGHT_GRAY);
                             g.fillOval(x-2, y-2, 4, 4);
                         }
                     }
+                    for (int i = 1; i < values.length; i++){
+                        int x = 10 + 5*Integer.parseInt(values[i][0]);
+                        int y = 10 + 5*Integer.parseInt(values[i][1]);
+                        int cases = Integer.parseInt(values[i][3]);
+                        if (cases != 0){
+                            int alpha = (int) Math.round(Math.min(255, 25 + cases/10d));
+                            g.setColor(new Color(200, 0, 200, alpha));
+                            int size = 4 + (int) Math.floor(cases / 100);
+//                            int size = 4;
+                            g.fillOval((int) Math.floor(x-(size/2)), (int) Math.floor(y-(size/2)), size, size);
+                        }
+                    }                    
                 } else {
                     for (int i = 1; i < values.length; i++){
                         int x = 10 + 5*Integer.parseInt(values[i][0]);
@@ -92,7 +89,7 @@ public class InfectionDataViewer {
                     }                   
                 }
                 
-                time = time + 1;  //normally 5
+                time = time + 5;
             } catch (FileNotFoundException fnfe){
                 //done.
                 notDone = false;
