@@ -60,12 +60,12 @@ public class KernelTest {
         kernel2.setMinorAxis(minorAxis2);
         kernel2.setMajorAxisOrientation(majorAxisOrientation2);
         
-        double[][] rasterArray = new double[250][250];
+        float[][] rasterArray = new float[250][250];
         
         for(int x = 0; x < 250; x++){
             for (int y = 0; y < 250; y++){                
-                rasterArray[x][y] = kernel1.getValueAt(new Point2D.Double(x, y)) +
-                                    kernel2.getValueAt(new Point2D.Double(x, y));
+                rasterArray[x][y] = (float) kernel1.getValueAt(new Point2D.Double(x, y)) +
+                                    (float) kernel2.getValueAt(new Point2D.Double(x, y));
             }
         }
         

@@ -33,15 +33,20 @@ public class PATrackClassificationTest {
     }
     
     public static void main(String[] args){
-        debug();
+        String[] methods = {"base", "FZ", "GAM"};
+        for (int k = 2; k < 302; k++) {
+            for (int i = 0; i < methods.length; i++) {
+                debug(methods[i], k);                
+            } 
+        }
     }
     
-    private static void debug(){
+    private static void debug(String method, int kForKNN){
         //read in the training data
         File f;
         String[][] values;
         try{
-            f = new File("E:/synthLandscan/momentData/baseTrainingLogNoZ.csv");
+            f = new File("D:/synthLandscan/momentData/fiveClassPACorrected/" + method + "testData.csv");
             FileReader in = new FileReader(f);
             CSVParser csvp = new CSVParser(in);
             values = csvp.getAllValues();
@@ -135,9 +140,9 @@ public class PATrackClassificationTest {
         }
         
         SetClassifier classifier = new SetClassifier();
-//        SimpleKNN knn = new SimpleKNN();
-        DistanceWeightedKNN knn = new DistanceWeightedKNN();
-        knn.setK(26);  //26 is the best value of k for GAM
+        SimpleKNN knn = new SimpleKNN();
+//        DistanceWeightedKNN knn = new DistanceWeightedKNN();
+        knn.setK(kForKNN);  
         knn.setTrainingData(z);
         ShapeClassifier shape = new ShapeClassifier();
         shape.setClassifier(knn);
@@ -149,20 +154,23 @@ public class PATrackClassificationTest {
         //and classifier should now be ready.
         
         int[] modes = new int[]{SetClassifier.MODE, SetClassifier.AVERAGE, SetClassifier.SIMPLE_DS, SetClassifier.PROP_BEL_TRANS, SetClassifier.COMBINED_AVERAGE, SetClassifier.MODIFIED_AVERAGE, SetClassifier.TREE_PBT};
+        String[] modeStrings = {"mode", "average", "simple DS", "prop bel trans", "comb. ave.", "modified ave.", "tree prop bel trans"};
         double[][] theseClassifications = new double[modes.length][];
-        double[][][] allClassifications = new double[120][modes.length][];
+        double[][][] allClassifications = new double[200][modes.length][];
         int allIndex = 0;
         String[] classNames = shape.getClassNames();
-        
+//        for (int i = 0; i < classNames.length; i++) {
+//            System.out.println(classNames[i]);            
+//        }
         //read in the moment data
         File f2;
         String[][] momentValues;
-        String[] types = new String[]{"inf", "road", "wind"};
+        String[] types = new String[]{"inf", "road", "wind", "river", "airport"};                
         for (int type = 0; type < types.length; type++){
             System.out.println("type " + types[type]);
             for (int run = 10; run < 50; run++){
                 try{
-                    f2 = new File("E:/synthLandscan/" + types[type] + "/run"  + run + "/baseMoments.csv");
+                    f2 = new File("D:/synthLandscan/" + types[type] + "/run"  + run + "/" + method + "Moments.csv");
                     FileReader in = new FileReader(f2);
                     CSVParser csvp = new CSVParser(in);
                     momentValues = csvp.getAllValues();
@@ -172,10 +180,10 @@ public class PATrackClassificationTest {
                     throw new RuntimeException("IO Exception!  " + ioe.getMessage());
                 }
                 
-                double[][] moments = new double[momentValues.length-1][momentValues[0].length];
-                for (int i = 1; i < momentValues.length; i++){
+                double[][] moments = new double[momentValues.length][momentValues[0].length];
+                for (int i = 0; i < momentValues.length; i++){
                     for (int j = 0; j < momentValues[i].length; j++){
-                        moments[i-1][j] = Double.parseDouble(momentValues[i][j]);
+                        moments[i][j] = Double.parseDouble(momentValues[i][j]);
                     }
                 }
                 
@@ -200,17 +208,17 @@ public class PATrackClassificationTest {
                     System.arraycopy(theseClassifications[blob], 0, allClassifications[allIndex][blob], 0, theseClassifications[blob].length);
                 }
                 allIndex++;
-                System.out.println("finished #" + allIndex);
+//                System.out.println("finished #" + allIndex);
             }
         }
         
         try{
-            FileWriter outFile = new FileWriter("E:/synthLandscan/momentData/baseClassifications.csv");
+            FileWriter outFile = new FileWriter("D:/synthLandscan/momentData/fiveClassPACorrected/" + method + "/simple" + method + "Classifications" + kForKNN + ".csv");
             
-            outFile.write("mode, wind, road, SIR, THETA" + '\n');
+            outFile.write("mode, SIR, river, road, wind, airport, THETA" + '\n');
             for (int i = 0; i < allClassifications.length; i++){
                 for (int j = 0; j < allClassifications[i].length; j++){
-                    outFile.write("" + j);
+                    outFile.write("" + modeStrings[j]);
                     for (int k = 0; k < allClassifications[i][j].length; k++){
                         outFile.write("," + allClassifications[i][j][k]);
                     }
@@ -219,7 +227,7 @@ public class PATrackClassificationTest {
             }
             
             outFile.close();
-            System.out.println("wrote base classifications");
+            System.out.println("wrote " + method + " classifications");
             
         } catch (IOException ioe){
             System.out.println("IOException when saving summary file: " + ioe.getMessage());
