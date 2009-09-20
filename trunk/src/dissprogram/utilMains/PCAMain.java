@@ -42,7 +42,7 @@ public class PCAMain {
         File f;
         String[][] values;
         try{
-            f = new File("C:/jconley/diss/moment_tests/logCombined12Z.csv");
+            f = new File("D:/synthLandscan/momentData/GAMtestData.csv");
             FileReader in = new FileReader(f);
             CSVParser csvp = new CSVParser(in);
             values = csvp.getAllValues(); 

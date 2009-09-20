@@ -43,20 +43,21 @@ public class LandscanTrainingDataGenerator {
     }
      
     public static void main(String[] args){
-        String[] types = new String[]{"inf", "road", "wind"};        
+//        String[] types = new String[]{"inf", "road", "wind"};  
+        String[] types = new String[]{"airport"};
         MomentGenerator mg = new MomentGenerator(); 
         
         //for the first ten tracks of each type (or whichever ones, really
-        for (int run = 3; run < 50; run++){                  
+        for (int run = 40; run < 50; run++){                  
             //for each of the three types            
-            for (int type = 0; type < 3; type++){  
+            for (int type = 0; type < types.length; type++){  
 //                if ((run != 2) || (type != 0)){
                 String thisType = types[type];  
                 double[][] moments = new double[40][];                         
                 //get the track length from the summary
                 int length = 0;
                 try{
-                    File summary = new File("E:/synthLandscan/" + thisType + "/run" + run + "/summary.csv");
+                    File summary = new File("D:/synthLandscan/" + thisType + "/run" + run + "/summary.csv");
                     FileReader in = new FileReader(summary);
                     CSVParser csvp = new CSVParser(in);
                     String[][] values = csvp.getAllValues();   
@@ -70,7 +71,7 @@ public class LandscanTrainingDataGenerator {
                     double interval = (double) length / 40d;
                     int time = nearestMultipleOfFive((int) Math.round(interval * step));
 //                    if ((run != 2) || (type != 1) || (step > 81)){
-                    File file = new File("E:/synthLandscan/" + thisType + "/run" + run + "/" + thisType + "PAtime" + time + ".csv");
+                    File file = new File("D:/synthLandscan/" + thisType + "/run" + run + "/" + thisType + "PAtime" + time + ".csv");
                     float[][] raster;
                     //run GAM & get a coverage out of it (or use the base raster)
                     raster = FZRasterFromFile(file);
@@ -83,7 +84,7 @@ public class LandscanTrainingDataGenerator {
                     }
                     System.out.println("finished moments for type " + thisType + ", run " + run + ", step " + step); 
                     try{
-                        File momentFile = new File("E:/synthLandscan/" + thisType + "/run" + run + "/FZMoments" + step + ".csv");
+                        File momentFile = new File("D:/synthLandscan/" + thisType + "/run" + run + "/FZMoments" + step + ".csv");
                         FileWriter momentWriter = new FileWriter(momentFile);
                         momentWriter.write(""+temp[0]);
                         for (int l = 1; l < temp.length; l++){
@@ -98,7 +99,7 @@ public class LandscanTrainingDataGenerator {
                 }  //end for (int step...
                 //stash away for safekeeping and repeat, repeat, repeat!                 
                 try{
-                    File momentFile = new File("E:/synthLandscan/" + thisType + "/run" + run + "/FZMoments.csv");
+                    File momentFile = new File("D:/synthLandscan/" + thisType + "/run" + run + "/FZMoments.csv");
                     FileWriter momentWriter = new FileWriter(momentFile);
                     for (int k = 0; k < moments.length; k++){
                         momentWriter.write(""+moments[k][0]);
@@ -280,7 +281,7 @@ public class LandscanTrainingDataGenerator {
         ip.setGam(gam);                 
 
         //get the image
-        GridCoverage2D coverage = ip.generateCoverageGAMOpt();
+        GridCoverage2D coverage = ip.generateCoverage();
 
         //binarize it
         int floor = (int) Math.floor(ip.getMinHeight());

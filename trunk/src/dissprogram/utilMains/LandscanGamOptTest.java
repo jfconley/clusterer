@@ -36,7 +36,7 @@ public class LandscanGamOptTest {
     }
     
     public static void main(String[] args){
-        File file = new File("E:/synthLandscan/inf/run0/infPAtime600.csv");
+        File file = new File("D:/synthLandscan/inf/run0/infPAtime600.csv");
         GridCoverage2D coverage;
         //run GAM & get a coverage out of it
         coverage = rasterFromFile(file);
