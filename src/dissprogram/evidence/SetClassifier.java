@@ -252,7 +252,7 @@ public class SetClassifier {
                 BeliefFunction combined = ds.combineShafer(belief, next);
                 belief = combined;
             } catch (DSTotalConflictException dtce){
-                System.out.println("INCOMPATIBLE!!!");
+//                System.out.println("INCOMPATIBLE!!!");
                 belief = new BeliefFunction(classNames);
                 double[] nans = new double[classNames.length];
                 Arrays.fill(nans, Double.NaN);
