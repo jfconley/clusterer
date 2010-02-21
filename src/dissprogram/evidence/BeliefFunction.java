@@ -290,6 +290,9 @@ public class BeliefFunction {
             boolean ret = true;
             for (int i = 0; i < s.length; i++){
 //                System.out.println("checking " + s[i] + " against the list");
+                if (classNames == null){
+                    System.out.println("We have a problem.");
+                }
                 if (!(DissUtils.contains(classNames, s[i]))){
                     System.out.println("Error--one of the singletons, " + s[i] + ", is not in the list of class names");
                     ret = false;
