@@ -26,11 +26,11 @@ public class BaseRasterViewer {
     
     public static void main(String[] args){
         String[][] values;
-        float[][] raster = new float[975][975];
-        float[][] smoothed = new float[975][975];
+        float[][] raster = new float[765][765];  //975 for dissData, 765 for PA data
+        float[][] smoothed = new float[765][765];
             
         try{
-            File f = new File("E:/endOfSummer/synthData/road/run0/road75time800.csv");
+            File f = new File("D:/synthLandscan/randomStarts/inf/run1/infPAtime2205.csv");
             FileReader in = new FileReader(f);
             CSVParser csvp = new CSVParser(in);
             values = csvp.getAllValues();         
@@ -39,10 +39,10 @@ public class BaseRasterViewer {
                 int x = Integer.parseInt(values[i][0]);
                 int y = Integer.parseInt(values[i][1]);
                 int cases = Integer.parseInt(values[i][3]);
-                int rasterMinX = 13*x;
-                int rasterMinY = 13*y;
-                int rasterMaxX = 13*x + 12;
-                int rasterMaxY = 13*y + 12;
+                int rasterMinX = 9*x;  //was 13
+                int rasterMinY = 9*y;
+                int rasterMaxX = 9*x + 8;
+                int rasterMaxY = 9*y + 8;
 
                 if (cases == 0){
                     for (int j = rasterMinX; j <= rasterMaxX; j++){
@@ -66,10 +66,10 @@ public class BaseRasterViewer {
                     int zeros = 0;
                     int ones = 0;
 
-                    int rasterMinX = Math.max(0, i-6);
-                    int rasterMaxX = Math.min(i+6, raster.length-1);
-                    int rasterMinY = Math.max(0, j-6);
-                    int rasterMaxY = Math.min(j+6, raster[i].length-1);
+                    int rasterMinX = Math.max(0, i-4);  //these were 6 for dissData, 4 for PA
+                    int rasterMaxX = Math.min(i+4, raster.length-1);
+                    int rasterMinY = Math.max(0, j-4);
+                    int rasterMaxY = Math.min(j+4, raster[i].length-1);
 
                     for (int k = rasterMinX; k <= rasterMaxX; k++){
                         for (int l = rasterMinY; l <= rasterMaxY; l++){
