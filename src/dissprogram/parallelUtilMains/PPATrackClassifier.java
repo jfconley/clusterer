@@ -29,27 +29,65 @@ public class PPATrackClassifier {
     }
     
     public static void main(String[] args){
+        try{
 //        MethodClassifier simpleBase = new MethodClassifier("base", true);
 //        MethodClassifier dwBase = new MethodClassifier("base", false);
 //        MethodClassifier simpleFZ = new MethodClassifier("FZ", true);
 //        MethodClassifier dwFZ = new MethodClassifier("FZ", false);
-        MethodClassifier simpleGAM = new MethodClassifier("GAM", true);
-        MethodClassifier dwGAM = new MethodClassifier("GAM", false);
-
+//        MethodClassifier simpleGAMAffine = new MethodClassifier("GAMAffine", true);
+//        MethodClassifier dwGAMAffine = new MethodClassifier("GAMAffine", false);
+//        MethodClassifier simpleGAMSluzek = new MethodClassifier("GAMFullSluzek", true);
+//        MethodClassifier dwGAMSluzek = new MethodClassifier("GAMFullSluzek", false);
+//        MethodClassifier simpleGAMLi = new MethodClassifier("GAMLi", true);
+//        MethodClassifier dwGAMLi = new MethodClassifier("GAMLi", false);
+        MethodClassifier simpleGAMHu = new MethodClassifier("GAM", true);
+        MethodClassifier dwGAMHu = new MethodClassifier("GAM", false);        
+        
 //        Thread simpleBaseThread = new Thread(simpleBase);
 //        Thread dwBaseThread = new Thread(dwBase);
 //        Thread simpleFZThread = new Thread(simpleFZ);
 //        Thread dwFZThread = new Thread(dwFZ);
-        Thread simpleGAMThread = new Thread(simpleGAM);
-        Thread dwGAMThread = new Thread(dwGAM);
-
+//        Thread simpleGAMAffineThread = new Thread(simpleGAMAffine);
+//        Thread dwGAMAffineThread = new Thread(dwGAMAffine);
+//        Thread simpleGAMSluzekThread = new Thread(simpleGAMSluzek);
+//        Thread dwGAMSluzekThread = new Thread(dwGAMSluzek);
+//        Thread simpleGAMLiThread = new Thread(simpleGAMLi);
+//        Thread dwGAMLiThread = new Thread(dwGAMLi);
+        Thread simpleGAMHuThread = new Thread(simpleGAMHu);
+        Thread dwGAMHuThread = new Thread(dwGAMHu);
+        
 //        simpleBaseThread.start();
 //        dwBaseThread.start();
 //        simpleFZThread.start();
 //        dwFZThread.start();
-        simpleGAMThread.start();
-        dwGAMThread.start();                                
+//        simpleGAMAffineThread.start();
+//        dwGAMAffineThread.start();   
+//        simpleGAMSluzekThread.start();
+//        dwGAMSluzekThread.start(); 
+//        simpleGAMLiThread.start();
+//        dwGAMLiThread.start(); 
+        simpleGAMHuThread.start();
+        dwGAMHuThread.start();         
+        
+//        simpleGAMAffineThread.join();
+//        dwGAMAffineThread.join();   
+//        simpleGAMSluzekThread.join();
+//        dwGAMSluzekThread.join(); 
+//        simpleGAMLiThread.join();
+//        dwGAMLiThread.join(); 
+        simpleGAMHuThread.join();
+        dwGAMHuThread.join();
+        
+        } catch (InterruptedException ie){
+            System.out.println(ie.getMessage());
+            threadMessage("This thread was interrupted");
+        }
     } 
+    
+    private static void threadMessage(String message){
+        String threadName = Thread.currentThread().getName();
+        System.out.format("%s: %s%n", threadName, message);
+    }     
     
     private static class MethodClassifier implements Runnable{
     
@@ -77,8 +115,13 @@ public class PPATrackClassifier {
                 throw new RuntimeException("IO Exception!  " + ioe.getMessage());
             }
 
+            int numInvs = values[1].length-1;
+            
             //to see if leaving one or two invariants out improves classification (Auroop from ORNL's suggestion)
-            boolean[] include = new boolean[]{true, true, true, true, true, true, true};
+            boolean[] include = new boolean[numInvs];
+            for (int i = 0; i < include.length; i++) {
+                include[i] = true;                
+            }
             int numInvsUsed = 0;
             for (int i = 0; i < include.length; i++){
                 if (include[i]){
@@ -182,7 +225,7 @@ public class PPATrackClassifier {
                 int[] modes = new int[]{SetClassifier.MODE, SetClassifier.AVERAGE, SetClassifier.SIMPLE_DS, SetClassifier.PROP_BEL_TRANS, SetClassifier.COMBINED_AVERAGE, SetClassifier.MODIFIED_AVERAGE, SetClassifier.TREE_PBT};
                 String[] modeStrings = {"mode", "average", "simple DS", "prop bel trans", "comb. ave.", "modified ave.", "tree prop bel trans"};
                 double[][] theseClassifications = new double[modes.length][];
-                double[][][] allClassifications = new double[222*5][modes.length][];
+                double[][][] allClassifications = new double[800*5][modes.length][];
                 int allIndex = 0;
                 String[] classNames = shape.getClassNames();
         //        for (int i = 0; i < classNames.length; i++) {
@@ -194,12 +237,28 @@ public class PPATrackClassifier {
                 String[] types = new String[]{"inf", "road", "wind", "river", "airport"};                
                 for (int type = 0; type < types.length; type++){
                     System.out.println(method + ": " + useSimpleKNN + ": " + types[type] + ": k=" + kForKNN);                    
-                    for (int run = 50; run < 272; run++){
+                    for (int run = 200; run < 1000; run++){
                         try{
                             f2 = new File("D:/synthLandscan/randomStarts/" + types[type] + "/run"  + run + "/" + method + "Moments.csv");
-                            FileReader in = new FileReader(f2);
-                            CSVParser csvp = new CSVParser(in);
-                            momentValues = csvp.getAllValues();
+//                            FileReader in = new FileReader(f2);
+//                            CSVParser csvp = new CSVParser(in);
+//                            momentValues = csvp.getAllValues();
+                            
+                            if (f2.exists()){
+                                FileReader reader = new FileReader(f2);
+                                CSVParser csvp = new CSVParser(reader);
+                                momentValues = csvp.getAllValues(); 
+                            } else { 
+                                momentValues = new String[40][];
+                                for (int x = 0; x < 40; x++){
+                                    File next = new File("D:/synthLandscan/randomStarts/" + types[type] + "/run" + run + "/" + method + "Moments" + x + ".csv");
+                                    FileReader reader = new FileReader(next);
+                                    CSVParser csvp = new CSVParser(reader);
+                                    String[][] localValues = csvp.getAllValues(); 
+                                    momentValues[x] = localValues[0];
+                                }
+                            }                            
+                            
                         } catch (FileNotFoundException fnfe){
                             throw new RuntimeException("No file!  " + fnfe.getMessage());
                         } catch (IOException ioe){
@@ -234,7 +293,7 @@ public class PPATrackClassifier {
                             System.arraycopy(theseClassifications[blob], 0, allClassifications[allIndex][blob], 0, theseClassifications[blob].length);
                         }
                         allIndex++;
-        //                System.out.println("finished #" + allIndex);
+                        System.out.println("finished " + method + " simple=" + useSimpleKNN + " k=" + kForKNN + " track#" + allIndex);
                     }
                 }
 
